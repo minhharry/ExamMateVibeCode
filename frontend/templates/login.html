@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - ExamMate{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card glass-card">
+        <div class="auth-header">
+            <h1>📚 ExamMate</h1>
+            <p>Sign in to your account</p>
+        </div>
+
+        <form method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter your username"
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password"
+                    autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+                Sign In
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Create one</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

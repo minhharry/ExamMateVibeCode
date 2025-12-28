@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.quiz_title }} - ExamMate{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <a href="{{ url_for('quizzes') }}" class="back-link">← Back to Quizzes</a>
+        <h1>📝 {{ quiz.quiz_title }}</h1>
+        <p>Answer the questions below to test your knowledge</p>
+    </div>
+
+    <div class="quiz-container">
+        <div class="quiz-progress glass-card">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span class="progress-text" id="progress-text">0 / {{ quiz.questions|length }}</span>
+        </div>
+
+        <div class="quiz-questions">
+            {% for question in quiz.questions %}
+            <div class="question-card glass-card" data-question-id="{{ question.id }}"
+                data-correct="{{ question.answer_index }}">
+                <div class="question-number">Question {{ loop.index }}</div>
+                <h3 class="question-text">{{ question.question }}</h3>
+
+                <div class="options">
+                    {% for option in question.options %}
+                    <button class="option-btn" data-index="{{ loop.index0 }}" onclick="selectOption(this)">
+                        <span class="option-letter">{{ ['A', 'B', 'C', 'D'][loop.index0] }}</span>
+                        <span class="option-text">{{ option }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <div class="answer-feedback" id="feedback-{{ question.id }}">
+                    <div class="correct-answer">
+                        <strong>Correct Answer:</strong> {{ question.correct_answer }}
+                    </div>
+                    <div class="explanation">
+                        <strong>Explanation:</strong> {{ question.why_correct }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="quiz-results glass-card" id="quiz-results">
+            <h2>🎉 Quiz Complete!</h2>
+            <div class="results-score">
+                <span class="score-number" id="final-score">0</span>
+                <span class="score-total">/ {{ quiz.questions|length }}</span>
+            </div>
+            <p class="results-message" id="results-message"></p>
+            <div class="results-actions">
+                <button class="btn btn-primary" onclick="resetQuiz()">Try Again</button>
+                <a href="{{ url_for('quizzes') }}" class="btn btn-outline">Back to Quizzes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let answeredCount = 0;
+    let correctCount = 0;
+    const totalQuestions = {{ quiz.questions| length }};
+
+    function selectOption(btn) {
+        const card = btn.closest('.question-card');
+        if (card.classList.contains('answered')) return;
+
+        const options = card.querySelectorAll('.option-btn');
+        const selectedIndex = parseInt(btn.dataset.index);
+        const correctIndex = parseInt(card.dataset.correct);
+        const feedbackEl = document.getElementById('feedback-' + card.dataset.questionId);
+
+        card.classList.add('answered');
+
+        options.forEach((opt, idx) => {
+            opt.disabled = true;
+            if (idx === correctIndex) {
+                opt.classList.add('correct');
+            }
+            if (idx === selectedIndex && idx !== correctIndex) {
+                opt.classList.add('incorrect');
+            }
+        });
+
+        feedbackEl.style.display = 'block';
+
+        answeredCount++;
+        if (selectedIndex === correctIndex) {
+            correctCount++;
+        }
+
+        updateProgress();
+
+        if (answeredCount === totalQuestions) {
+            showResults();
+        }
+    }
+
+    function updateProgress() {
+        const percent = (answeredCount / totalQuestions) * 100;
+        document.getElementById('progress-fill').style.width = percent + '%';
+        document.getElementById('progress-text').textContent = answeredCount + ' / ' + totalQuestions;
+    }
+
+    function showResults() {
+        const resultsEl = document.getElementById('quiz-results');
+        const scoreEl = document.getElementById('final-score');
+        const messageEl = document.getElementById('results-message');
+
+        scoreEl.textContent = correctCount;
+
+        const percentage = (correctCount / totalQuestions) * 100;
+        if (percentage >= 90) {
+            messageEl.textContent = 'Excellent! You really know this material! 🌟';
+        } else if (percentage >= 70) {
+            messageEl.textContent = 'Great job! Keep up the good work! 👍';
+        } else if (percentage >= 50) {
+            messageEl.textContent = 'Good effort! Review the explanations to improve. 📚';
+        } else {
+            messageEl.textContent = 'Keep studying! You\'ll get there. 💪';
+        }
+
+        resultsEl.style.display = 'block';
+        resultsEl.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+        answeredCount = 0;
+        correctCount = 0;
+
+        document.querySelectorAll('.question-card').forEach(card => {
+            card.classList.remove('answered');
+            card.querySelectorAll('.option-btn').forEach(opt => {
+                opt.disabled = false;
+                opt.classList.remove('correct', 'incorrect');
+            });
+        });
+
+        document.querySelectorAll('.answer-feedback').forEach(fb => {
+            fb.style.display = 'none';
+        });
+
+        document.getElementById('quiz-results').style.display = 'none';
+        updateProgress();
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

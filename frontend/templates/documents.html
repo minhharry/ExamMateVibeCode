@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Documents - ExamMate{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>📄 Documents</h1>
+        <p>Manage your study materials</p>
+    </div>
+
+    <div class="toolbar glass-card">
+        <form method="GET" class="search-form">
+            <input type="text" name="q" placeholder="Search documents..." value="{{ search_query }}"
+                class="search-input">
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if search_query %}
+            <a href="{{ url_for('documents') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+
+        <form method="POST" action="{{ url_for('upload_document') }}" enctype="multipart/form-data" class="upload-form">
+            <input type="file" name="file" id="file-input" accept=".pdf" class="file-input"
+                onchange="this.form.submit()">
+            <label for="file-input" class="btn btn-accent">
+                📤 Upload PDF
+            </label>
+        </form>
+    </div>
+
+    {% if documents %}
+    <div class="items-grid">
+        {% for doc in documents %}
+        <div class="item-card glass-card">
+            <div class="item-icon">📄</div>
+            <div class="item-content">
+                <h3 class="item-title" title="{{ doc.filename }}">{{ doc.filename }}</h3>
+                <p class="item-meta">
+                    <span>ID: {{ doc.id[:8] }}...</span>
+                    {% if doc.created_at %}
+                    <span>Created: {{ doc.created_at }}</span>
+                    {% endif %}
+                </p>
+                {% if doc.summary %}
+                <div class="item-summary">
+                    <strong>Summary:</strong>
+                    <p>{{ doc.summary[:200] }}{% if doc.summary|length > 200 %}...{% endif %}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="item-actions">
+                <a href="{{ url_for('download_document', doc_id=doc.id) }}" class="btn btn-sm btn-outline"
+                    title="Download">
+                    ⬇️ Download
+                </a>
+                {% if not doc.summary %}
+                <form method="POST" action="{{ url_for('generate_summary', doc_id=doc.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-primary" title="Generate Summary">
+                        ✨ Summary
+                    </button>
+                </form>
+                {% endif %}
+                <form method="POST" action="{{ url_for('delete_document', doc_id=doc.id) }}" style="display:inline;"
+                    onsubmit="return confirm('Delete this document?')">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                        🗑️ Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state glass-card">
+        <div class="empty-icon">📄</div>
+        <h2>No documents yet</h2>
+        <p>Upload your first PDF document to get started!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - ExamMate{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Welcome back, {{ user.get('full_name') or user.get('username', 'User') }}! 👋</h1>
+        <p>What would you like to do today?</p>
+    </div>
+
+    <div class="dashboard-stats">
+        <div class="stat-card glass-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-info">
+                <h3>Documents</h3>
+                <p>Manage your study materials</p>
+            </div>
+            <a href="{{ url_for('documents') }}" class="btn btn-primary">View</a>
+        </div>
+
+        <div class="stat-card glass-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+                <h3>Quizzes</h3>
+                <p>Test your knowledge</p>
+            </div>
+            <a href="{{ url_for('quizzes') }}" class="btn btn-primary">View</a>
+        </div>
+
+        <div class="stat-card glass-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <h3>Schedule</h3>
+                <p>Plan your study sessions</p>
+            </div>
+            <a href="{{ url_for('schedule') }}" class="btn btn-primary">View</a>
+        </div>
+    </div>
+
+    <div class="quick-actions glass-card">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+            <a href="{{ url_for('documents') }}" class="action-btn">
+                <span class="action-icon">📤</span>
+                <span>Upload Document</span>
+            </a>
+            <a href="{{ url_for('quizzes') }}" class="action-btn">
+                <span class="action-icon">✨</span>
+                <span>Generate Quiz</span>
+            </a>
+            <a href="{{ url_for('schedule') }}" class="action-btn">
+                <span class="action-icon">➕</span>
+                <span>Add Schedule</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="user-info glass-card">
+        <h2>Your Profile</h2>
+        <div class="profile-details">
+            <div class="profile-item">
+                <span class="label">Username:</span>
+                <span class="value">{{ user.get('username', 'N/A') }}</span>
+            </div>
+            <div class="profile-item">
+                <span class="label">Email:</span>
+                <span class="value">{{ user.get('email', 'Not set') }}</span>
+            </div>
+            <div class="profile-item">
+                <span class="label">Full Name:</span>
+                <span class="value">{{ user.get('full_name', 'Not set') }}</span>
+            </div>
+            <div class="profile-item">
+                <span class="label">Language:</span>
+                <span class="value">{{ user.get('language', 'en') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

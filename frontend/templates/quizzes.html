@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Quizzes - ExamMate{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>📝 Quizzes</h1>
+        <p>Test your knowledge with AI-generated quizzes</p>
+    </div>
+
+    <div class="toolbar glass-card">
+        <form method="GET" class="search-form">
+            <input type="text" name="q" placeholder="Search quizzes..." value="{{ search_query }}" class="search-input">
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if search_query %}
+            <a href="{{ url_for('quizzes') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+
+        <button class="btn btn-accent" onclick="toggleModal('generate-modal')">
+            ✨ Generate Quiz
+        </button>
+    </div>
+
+    {% if quizzes %}
+    <div class="items-grid">
+        {% for quiz in quizzes %}
+        <div class="item-card glass-card">
+            <div class="item-icon">📝</div>
+            <div class="item-content">
+                <h3 class="item-title">{{ quiz.quiz_title }}</h3>
+                <p class="item-meta">
+                    <span>ID: {{ quiz.quiz_id[:8] }}...</span>
+                    {% if quiz.created_at %}
+                    <span>Created: {{ quiz.created_at }}</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="item-actions">
+                <a href="{{ url_for('quiz_detail', quiz_id=quiz.quiz_id) }}" class="btn btn-sm btn-primary">
+                    ▶️ Take Quiz
+                </a>
+                <form method="POST" action="{{ url_for('delete_quiz', quiz_id=quiz.quiz_id) }}" style="display:inline;"
+                    onsubmit="return confirm('Delete this quiz?')">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        🗑️ Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state glass-card">
+        <div class="empty-icon">📝</div>
+        <h2>No quizzes yet</h2>
+        <p>Generate your first quiz from a document!</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Generate Quiz Modal -->
+<div id="generate-modal" class="modal">
+    <div class="modal-content glass-card">
+        <div class="modal-header">
+            <h2>✨ Generate Quiz</h2>
+            <button class="modal-close" onclick="toggleModal('generate-modal')">×</button>
+        </div>
+        <form method="POST" action="{{ url_for('generate_quiz') }}" class="modal-form">
+            <div class="form-group">
+                <label for="document_id">Select Document</label>
+                <select name="document_id" id="document_id" required>
+                    <option value="">Choose a document...</option>
+                    {% for doc in documents %}
+                    <option value="{{ doc.id }}">{{ doc.filename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="num_questions">Number of Questions</label>
+                <input type="number" name="num_questions" id="num_questions" value="10" min="1" max="50">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="toggleModal('generate-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Generate</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
