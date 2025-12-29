@@ -5,7 +5,7 @@ A modern web interface for the ExamMate API.
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
 from dotenv import load_dotenv
-from api_client import APIClient
+from api_client import APIClient, TokenExpiredException
 from functools import wraps
 
 # Load environment variables
@@ -36,6 +36,15 @@ def get_api():
     if 'token' in session:
         api.set_token(session['token'])
     return api
+
+
+@app.errorhandler(TokenExpiredException)
+def handle_token_expired(error):
+    """Handle expired token by logging out and redirecting to login."""
+    session.clear()
+    api.clear_token()
+    flash('Your session has expired. Please log in again.', 'warning')
+    return redirect(url_for('login'))
 
 
 # ==================== Authentication Routes ====================
@@ -313,4 +322,4 @@ def delete_schedule(schedule_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000)

@@ -6,6 +6,11 @@ import requests
 from typing import Optional, List, Dict, Any
 
 
+class TokenExpiredException(Exception):
+    """Exception raised when the authentication token has expired."""
+    pass
+
+
 class APIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip('/')
@@ -31,7 +36,11 @@ class APIClient:
         url = f"{self.base_url}{endpoint}"
         if "headers" not in kwargs:
             kwargs["headers"] = self._headers()
-        return requests.request(method, url, **kwargs)
+        response = requests.request(method, url, **kwargs)
+        # Check for token expiration (401 Unauthorized)
+        if response.status_code == 401 and self.token:
+            raise TokenExpiredException("Authentication token has expired. Please log in again.")
+        return response
 
     # ==================== Authentication ====================
 
